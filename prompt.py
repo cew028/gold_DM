@@ -2,9 +2,9 @@ class OutsideOptionScopeError(Exception):
     """Raised if you try to answer a question with something that does not answer it."""
     pass
 
-def multiple_choice(question: str = "", options: list = []) -> int:
-    """This function takes as input a question and a list of answers.
-    It outputs the answer selected (starting at 0)."""
+def multiple_choice(question: str = "", options: list = []) -> str:
+    """This function takes as input a question and a list of answers (strings).
+    It outputs the answer selected."""
     options_letters = []
     for i in range(0,len(options)):
         options_letters.append(chr(ord('@')+i+1))
@@ -13,7 +13,7 @@ def multiple_choice(question: str = "", options: list = []) -> int:
         print(f"[{options_letters[i]}] {options[i]}")
     while True:
         try:
-            answer = str(input())
+            answer = str(input(">"))
             if answer.capitalize() not in options_letters:
                 raise OutsideOptionScopeError
         except (ValueError, OutsideOptionScopeError):

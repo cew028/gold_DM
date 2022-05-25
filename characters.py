@@ -47,6 +47,7 @@ class Player():
         equipped_weapon = {"Name" : "None", "Bonus" : 0, "Effect": "None"},
         spellcasting_stat = "None",
         spell_list = "None",
+        abilities = [],
     ):
         self.name = name
         self.character_class = character_class
@@ -77,18 +78,65 @@ class Player():
         self.equipped_weapon = equipped_weapon
         self.spellcasting_stat = spellcasting_stat
         self.spell_list = spell_list
+        self.abilities = abilities
     
-    def calculate_AC(self):
+    def calculate_AC(self) -> int:
         return self.DEX + self.equipped_armor["Bonus"] + self.equipped_shield["Bonus"]
     
-    def calculate_AV(self):
+    def calculate_AV(self) -> int:
         return self.AV_by_level[self.level-1]
     
-    def calculate_level_up_gold(self):
+    def calculate_highest_stat(self) -> list:
+        highest_stat = []
+        highest_value = max(self.CHA, self.CON, self. DEX, self.INT, self.STR, self.WIS)
+        if highest_value == self.CHA:
+            highest_stat.append("Charisma")
+        if highest_value == self.CON:
+            highest_stat.append("Constituion")
+        if highest_value == self.DEX:
+            highest_stat.append("Dexterity")
+        if highest_value == self.INT:
+            highest_stat.append("Intelligence")
+        if highest_value == self.STR:
+            highest_stat.append("Strength")
+        if highest_value == self.WIS:
+            highest_stat.append("Wisdom")
+        match len(highest_stat):
+            case 1:
+                return highest_stat[0]
+            case 2:
+                return highest_stat[0] + " and " + highest_stat[1]
+            case 3:
+                return highest_stat[0] + ", " + highest_stat[1] + ", and " + highest_stat[2]
+            case 4:
+                return highest_stat[0] + ", " + highest_stat[1] + ", " + highest_stat[2] + ", and " + highest_stat[3]
+            case 5:
+                return highest_stat[0] + ", " + highest_stat[1] + ", " + highest_stat[2] + ", " + highest_stat[3] + ", and " + highest_stat[4]
+            case 6:
+                return "everything"
+    
+    def calculate_level_up_gold(self) -> int:
         return gold_to_reach_level[self.level+1]
+        
+    def character_sheet(self):
+        return draw.frame(
+            100, 
+            [
+                f"{self.name}: ({self.character_class} {self.level})",
+                f"CHA {self.CHA}, CON {self.CON}, DEX {self.DEX}, INT {self.INT}, STR {self.STR}, WIS {self.WIS}",
+                f"{self.current_hp}/{self.max_hp} HP, {self.AC} AC, {self.AV} AV",
+                f"{self.gold_spent_this_level} gold spent this level, {self.gold_on_person} gold on person",
+                f"EQUIPMENT: ({len(self.inventory)}/{self.STR})",
+                f"{', '.join(self.inventory)}",
+                "ABILITIES:",
+                "* " + "\n* ".join(self.abilities),
+                "SPELLS:",
+                "* " + "\n* ".join(self.spells),
+            ]
+        )
     
     def create(self):
-        self.name = str(input("What is your name?\n"))
+        self.name = str(input("What is your name?\n>"))
         difficulty = prompt.multiple_choice("How powerful will you be?", ["Extreme", "Standard", "Classic"])
         self.gold_on_person = dice.roll(3,6,3)*10
         match difficulty:
@@ -113,6 +161,7 @@ class Player():
                 self.INT = dice.roll(3,6,3)
                 self.STR = dice.roll(3,6,3)
                 self.WIS = dice.roll(3,6,3)
+        print(f"\nYou're naturally most proficient in {self.calculate_highest_stat()}.")
         self.character_class = prompt.multiple_choice("What is your class?",
             [
                 "Cleric", 
@@ -136,6 +185,7 @@ class Player():
                 self.AV_by_level = [11, 11, 12, 12, 12, 13, 13, 14, 14, 14]
                 self.spellcasting_stat = "WIS"
                 self.spell_list = "Divine"
+                self.abilities = ["Channel Energy", "Turn Undead"]
             case "Druid":
                 self.die = 6
                 self.max_weapon = 4
@@ -144,12 +194,14 @@ class Player():
                 self.AV_by_level = [8, 8, 9, 9, 9, 10, 10, 11, 11, 11]
                 self.spellcasting_stat = "WIS"
                 self.spell_list = "Nature"
+                self.abilities = ["Sustain in Nature", "Rituals"]
             case "Dwarf":
                 self.die = 8
                 self.max_weapon = 8
                 self.max_armor = "Heavy"
                 self.max_shield = "Large"
                 self.AV_by_level = [11, 11, 12, 12, 13, 13, 14, 14, 15, 15]
+                self.abilities = ["Science and Medicine", "Inspire"]
             case "Elf":
                 self.die = 6
                 self.max_weapon = 8
@@ -158,18 +210,21 @@ class Player():
                 self.AV_by_level = [11, 11, 12, 13, 13, 14, 15, 15, 16, 17]
                 self.spellcasting_stat = "INT"
                 self.spell_list = "Arcane"
+                self.abilities = ["Surge", "Exert"]
             case "Fighter":
                 self.die = 10
                 self.max_weapon = 8
                 self.max_armor = "Heavy"
                 self.max_shield = "Large"
                 self.AV_by_level = [11, 12, 12, 13, 14, 14, 15, 16, 16, 17]
+                self.abilities = ["Multikill", "Sunder"]
             case "Halfling":
                 self.die = 6
                 self.max_weapon = 6
                 self.max_armor = "Light"
                 self.max_shield = "Small"
                 self.AV_by_level = [12, 12, 12, 12, 13, 13, 13, 13, 14, 14]
+                self.abilities = ["Avantageous Strike", "Favors"]
             case "Magic-User":
                 self.die = 4
                 self.max_weapon = 4
@@ -178,6 +233,7 @@ class Player():
                 self.AV_by_level = [8, 8, 8, 9, 9, 9, 10, 10, 10, 11]
                 self.spellcasting_stat = "INT"
                 self.spell_list = "Arcane"
+                self.abilities = ["Rituals", "Metamagic"]
             case "Paladin":
                 self.die = 10
                 self.max_weapon = 8
@@ -186,6 +242,7 @@ class Player():
                 self.AV_by_level = [11, 11, 12, 12, 13, 13, 14, 14, 15, 15]
                 self.spellcasting_stat = "CHA"
                 self.spell_list = "Divine"
+                self.abilities = ["Lay on Hands", "Body Shield"]
             case "Ranger":
                 self.die = 8
                 self.max_weapon = 6
@@ -194,6 +251,7 @@ class Player():
                 self.AV_by_level = [11, 11, 12, 12, 13, 13 ,14, 14, 15, 15]
                 self.spellcasting_stat = "WIS"
                 self.spell_list = "Nature"
+                self.abilities = ["Quarry", "Favored Terrain"]
             case "Warlock":
                 self.die = 4
                 self.max_weapon = 4
@@ -202,6 +260,7 @@ class Player():
                 self.AV_by_level = [8, 8, 8, 9, 9, 9, 10, 10, 10, 11]
                 self.spellcasting_stat = "INT"
                 self.spell_list = "Necronomicon"
+                self.abilities = ["Corruption",]
         self.level = 1
         self.AV = self.calculate_AV()
         self.max_hp = dice.roll(1,self.die,1) + 4
@@ -209,17 +268,11 @@ class Player():
         self.gold_to_next_level = self.calculate_level_up_gold()
         self.AC = self.calculate_AC()
         
-        draw.frame(
-            100, 
-            [
-                f"{self.name}: ({self.character_class} {self.level})",
-                f"CHA {self.CHA}, CON {self.CON}, DEX {self.DEX}, INT {self.INT}, STR {self.STR}, WIS {self.WIS}",
-                f"{self.current_hp}/{self.max_hp} HP, {self.AC} AC, {self.AV} AV",
-                f"{self.gold_spent_this_level} gold spent this level, {self.gold_on_person} gold on person",
-                f"EQUIPMENT: ({len(self.inventory)}/{self.STR})",
-                f"{self.inventory}",
-                "ABILITIES:",
-                "SPELLS:",
-                "A test line that goes over 100 characters and therefore breaks the frame's bounding box. What will happen? Who is to say? This will find out. It successfully breaks after one line but can't handle two or more yet. So let's fix that next, okay? Sounds good to me. :) Blah blah blah blah blah blah. It should only fail on the very last line. asldfkj alksjfd aksljfd lkasjf dlkajs a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a aa a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a sdfa sdfa fdas s adf sadfaf sd asfds afds afds poooooooooooooooooooooop zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
-            ]
-        )
+        self.character_sheet()
+        
+        confirm = prompt.multiple_choice("Confirm the above character?", ["Yes", "No"])
+        match confirm:
+            case "Yes":
+                print("\nYou confirmed.")
+            case "No":
+                print("TODO: Make it so that the player reselects everything.")
