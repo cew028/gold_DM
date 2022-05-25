@@ -1,4 +1,5 @@
 import dice
+import draw
 import prompt
 
 gold_to_reach_level = {
@@ -208,4 +209,17 @@ class Player():
         self.gold_to_next_level = self.calculate_level_up_gold()
         self.AC = self.calculate_AC()
         
-        print(f"You just created a player with name {self.name} class {self.character_class} max weapon {self.max_weapon} max armor {self.max_armor} max shield {self.max_shield} level {self.level} AV by level {self.AV_by_level } CHA {self.CHA} CON {self.CON} DEX {self.DEX} INT {self.INT} STR {self.STR} WIS {self.WIS} current hp {self.current_hp} max hp {self.max_hp} AC {self.AC} AV {self.AV} gold on person {self.gold_on_person} gold stored away {self.gold_stored_away} gold spent this level {self.gold_spent_this_level} gold to next level {self.gold_to_next_level} inventory {self.inventory} spells {self.spells} equipped armor {self.equipped_armor} equipped shield {self.equipped_shield} equipped weapon {self.equipped_weapon} spellcasting stat {self.spellcasting_stat} spell list {self.spell_list}")
+        draw.frame(
+            100, 
+            [
+                f"{self.name}: ({self.character_class} {self.level})",
+                f"CHA {self.CHA}, CON {self.CON}, DEX {self.DEX}, INT {self.INT}, STR {self.STR}, WIS {self.WIS}",
+                f"{self.current_hp}/{self.max_hp} HP, {self.AC} AC, {self.AV} AV",
+                f"{self.gold_spent_this_level} gold spent this level, {self.gold_on_person} gold on person",
+                f"EQUIPMENT: ({len(self.inventory)}/{self.STR})",
+                f"{self.inventory}",
+                "ABILITIES:",
+                "SPELLS:",
+                "A test line that goes over 100 characters and therefore breaks the frame's bounding box. What will happen? Who is to say? This will find out. It successfully breaks after one line but can't handle two or more yet. So let's fix that next, okay? Sounds good to me. :) Blah blah blah blah blah blah. It should only fail on the very last line. asldfkj alksjfd aksljfd lkasjf dlkajs a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a aa a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a sdfa sdfa fdas s adf sadfaf sd asfds afds afds poooooooooooooooooooooop zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+            ]
+        )
