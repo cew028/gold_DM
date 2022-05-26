@@ -29,19 +29,22 @@ def open_response(question: str = "", options: list =[]) -> str:
     """This function takes as input a question and a list of answers (strings).
     It doesn't show the player the answers.
     When the player types an answer, it checks if what they typed appears in the list of options.
-    If it does, it outputs the chosen option."""
+    If it does, it outputs the chosen option.
+    If the player's answer matches multiple options, this function outputs the last one."""
     print(f"\n{question}")
+    final_answer = ""
     while True:
         try:
             answer = str(input(">"))
-            if answer.casefold() not in (option.casefold() for option in options):
+            for option in options:
+                if option.casefold() in answer.casefold(): # Check if any option is a substring of what the player wrote, case insensitively.
+                    final_answer = option
+            if final_answer == "":
                 raise OutsideOptionScopeError
         except (ValueError, OutsideOptionScopeError):
             print("\nI don't understand.")
             print("Please try again.")
             continue
         else:
-            selected_index = [option.lower() for option in options].index(answer.lower())
-            final_answer = options[selected_index]
             break
     return final_answer
