@@ -35,3 +35,9 @@ def frame(width: int = 100, contents: list = []) -> None:
     for i in range(width-2):
         print("═", end="")
     print("╝")
+
+def picture(width: int = 100, file = None) -> None:
+    """This function takes in a width (default 100) and a text file of an ASCII picture.
+    It then draws the picture in the command prompt."""
+    with open(file) as f:
+        print(f.read())
