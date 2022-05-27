@@ -21,7 +21,7 @@ class Player():
         name = "Unnamed",
         character_class = "None",
         die = 0,
-        max_weapon = 0,
+        max_weapon_die = 0,
         max_armor = "None",
         max_shield = "None",
         level = -1,
@@ -42,9 +42,9 @@ class Player():
         gold_to_next_level = 0,
         inventory = [],
         spells = [],
-        equipped_armor = {"Name" : "None", "Bonus" : 0, "Effect": "None"},
-        equipped_shield = {"Name" : "None", "Bonus" : 0, "Effect": "None"},
-        equipped_weapon = {"Name" : "None", "Bonus" : 0, "Effect": "None"},
+        equipped_armor = None,
+        equipped_shield = None,
+        equipped_weapon = None,
         spellcasting_stat = "None",
         spell_list = "None",
         abilities = [],
@@ -54,7 +54,7 @@ class Player():
         self.name = name
         self.character_class = character_class
         self.die = die
-        self.max_weapon = max_weapon
+        self.max_weapon_die = max_weapon_die
         self.max_armor = max_armor
         self.max_shield = max_shield
         self.level = level
@@ -85,7 +85,14 @@ class Player():
         self.location = location
     
     def calculate_AC(self) -> int:
-        return self.DEX + self.equipped_armor["Bonus"] + self.equipped_shield["Bonus"]
+        if self.equipped_armor is not None and self.equipped_shield is not None:
+            return self.DEX + self.equipped_armor.armor_bonus + self.equipped_shield.armor_bonus
+        elif self.equipped_shield is not None:
+            return self.DEX + self.equipped_shield.armor_bonus
+        elif self.equipped_armor is not None:
+            return self.DEX + self.equipped_armor.armor_bonus
+        else:
+            return self.DEX
     
     def calculate_AV(self) -> int:
         return self.AV_by_level[self.level-1]
@@ -183,7 +190,7 @@ class Player():
         match self.character_class:
             case "Cleric":
                 self.die = 8
-                self.max_weapon = 6
+                self.max_weapon_die = 6
                 self.max_armor = "Medium"
                 self.max_shield = "Large"
                 self.AV_by_level = [11, 11, 12, 12, 12, 13, 13, 14, 14, 14]
@@ -192,7 +199,7 @@ class Player():
                 self.abilities = ["Channel Energy", "Turn Undead"]
             case "Druid":
                 self.die = 6
-                self.max_weapon = 4
+                self.max_weapon_die = 4
                 self.max_armor = "Light"
                 self.max_shield = "None"
                 self.AV_by_level = [8, 8, 9, 9, 9, 10, 10, 11, 11, 11]
@@ -201,14 +208,14 @@ class Player():
                 self.abilities = ["Sustain in Nature", "Rituals"]
             case "Dwarf":
                 self.die = 8
-                self.max_weapon = 8
+                self.max_weapon_die = 8
                 self.max_armor = "Heavy"
                 self.max_shield = "Large"
                 self.AV_by_level = [11, 11, 12, 12, 13, 13, 14, 14, 15, 15]
                 self.abilities = ["Science and Medicine", "Inspire"]
             case "Elf":
                 self.die = 6
-                self.max_weapon = 8
+                self.max_weapon_die = 8
                 self.max_armor = "Medium"
                 self.max_shield = "Small"
                 self.AV_by_level = [11, 11, 12, 13, 13, 14, 15, 15, 16, 17]
@@ -217,21 +224,21 @@ class Player():
                 self.abilities = ["Surge", "Exert"]
             case "Fighter":
                 self.die = 10
-                self.max_weapon = 8
+                self.max_weapon_die = 8
                 self.max_armor = "Heavy"
                 self.max_shield = "Large"
                 self.AV_by_level = [11, 12, 12, 13, 14, 14, 15, 16, 16, 17]
                 self.abilities = ["Multikill", "Sunder"]
             case "Halfling":
                 self.die = 6
-                self.max_weapon = 6
+                self.max_weapon_die = 6
                 self.max_armor = "Light"
                 self.max_shield = "Small"
                 self.AV_by_level = [12, 12, 12, 12, 13, 13, 13, 13, 14, 14]
-                self.abilities = ["Avantageous Strike", "Favors"]
+                self.abilities = ["Advantageous Strike", "Favors"]
             case "Magic-User":
                 self.die = 4
-                self.max_weapon = 4
+                self.max_weapon_die = 4
                 self.max_armor = "Light"
                 self.max_shield = "None"
                 self.AV_by_level = [8, 8, 8, 9, 9, 9, 10, 10, 10, 11]
@@ -240,7 +247,7 @@ class Player():
                 self.abilities = ["Rituals", "Metamagic"]
             case "Paladin":
                 self.die = 10
-                self.max_weapon = 8
+                self.max_weapon_die = 8
                 self.max_armor = "Heavy"
                 self.max_shield = "Large"
                 self.AV_by_level = [11, 11, 12, 12, 13, 13, 14, 14, 15, 15]
@@ -249,7 +256,7 @@ class Player():
                 self.abilities = ["Lay on Hands", "Body Shield"]
             case "Ranger":
                 self.die = 8
-                self.max_weapon = 6
+                self.max_weapon_die = 6
                 self.max_armor = "Medium"
                 self.max_shield = "Small"
                 self.AV_by_level = [11, 11, 12, 12, 13, 13 ,14, 14, 15, 15]
@@ -258,7 +265,7 @@ class Player():
                 self.abilities = ["Quarry", "Favored Terrain"]
             case "Warlock":
                 self.die = 4
-                self.max_weapon = 4
+                self.max_weapon_die = 4
                 self.max_armor = "Light"
                 self.max_shield = "None"
                 self.AV_by_level = [8, 8, 8, 9, 9, 9, 10, 10, 10, 11]

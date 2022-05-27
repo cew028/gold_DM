@@ -1,3 +1,4 @@
+import Items.craft as craft
 import Locations.build as build
 
 details = {
@@ -38,3 +39,15 @@ room_2.accessible_rooms = [room_1,]
 room_3.accessible_rooms = [room_1,]
 room_4.accessible_rooms = [room_1,]
 room_5.accessible_rooms = [room_1, "To do:room_6",]
+
+# We craft the items in this coordinate:
+room_1_sword = craft.Item(
+    name = "Sword",
+    description = "A rusty iron sword.",
+    damage_die = 4,
+    armor_bonus = 0,
+    effect = "No effect",
+)
+
+# Then place those items in the respective rooms:
+room_1.contents = [room_1_sword,]
