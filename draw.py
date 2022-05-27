@@ -25,7 +25,7 @@ def frame(width: int = 100, contents: list = []) -> None:
                             # If adding the next word makes the line_temp too long.
                             white_space_line = width-len(line_temp)-2-1
                             print(f"║ {line_temp}" + white_space_line*" " + "║")
-                            line = ""
+                            line_temp = ""
                     else:
                         # There are no more words, so print whatever's left.
                         white_space_line = width-len(line_temp)-2-1

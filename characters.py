@@ -48,6 +48,8 @@ class Player():
         spellcasting_stat = "None",
         spell_list = "None",
         abilities = [],
+        are_alive = True,
+        location = None,
     ):
         self.name = name
         self.character_class = character_class
@@ -79,6 +81,8 @@ class Player():
         self.spellcasting_stat = spellcasting_stat
         self.spell_list = spell_list
         self.abilities = abilities
+        self.are_alive = are_alive
+        self.location = location
     
     def calculate_AC(self) -> int:
         return self.DEX + self.equipped_armor["Bonus"] + self.equipped_shield["Bonus"]
