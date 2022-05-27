@@ -9,10 +9,8 @@ def cls():
 
 def main():
     draw.picture(file="Pictures/Logo.txt")
-    # you = characters.Player()
-    # you.create()
+    # engine.you.create()
     # draw.picture(file="Pictures/Castle.txt")
-    # prompt.open_response("Hi how are you?", ["Good", "Okay", "Bad"])
     engine.gameplay_loop()
     
 if __name__ == "__main__":
