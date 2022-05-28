@@ -1,13 +1,15 @@
-import characters
+import player
 import draw
 import prompt
 import Locations.coord_0_0 as coord_0_0
 
 # Initialize the class:
-you = characters.Player()
+you = player.Player()
 
 # Set starting location (may later be randomized):
 you.location = coord_0_0.room_1
+
+no_list = ["N", "No", "Not", "Nothing", "Quit", "Go back", "Cancel", "Abort", "Negate",] # Use this list in open_response options as a collection of responses to indicate no.
 
 def drop():
     """The player chooses an item from their inventory and "drops it;" i.e., adds it to the room's contents."""
@@ -120,9 +122,9 @@ def gameplay_loop():
             # Fill out the options with as many synonyms as possible.
             # For readability, put synonyms on the same line.
             # Since open_response outputs the last selected option, substrings need to come first.
-            # For example: "equip" needs to occur before "unequip".
+            # For example: "equip" needs to come before "unequip". "move" needs to come before "remove".
             options = [
-                "go", "move", "walk",
+                "go", "move", "walk", "run", "flee", "escape",
                 "equip", "wear", "put on",
                 "unequip", "remove", "take off",
                 "drop", "put down", "place",
@@ -131,7 +133,7 @@ def gameplay_loop():
             ],
         )
         match what_you_do:
-            case "go" | "move" | "walk":
+            case "go" | "move" | "walk" | "run" | "flee" | "escape":
                 go_to()
             case "examine" | "look" | "look at":
                 look_at()
@@ -148,10 +150,11 @@ def go_to():
     """Ask the player where they want to go. Then change their location to be the destination."""
     target = prompt.multiple_choice(
         question = "Where do you want to go?",
-        options = [room.name for room in you.location.accessible_rooms],
+        options = ["Here"] + [room.name for room in you.location.accessible_rooms],
     )
-    you.location = match_string_to_class(target, you.location.accessible_rooms)
-    examine(you.location)
+    if target != "Here":
+        you.location = match_string_to_class(target, you.location.accessible_rooms)
+        examine(you.location)
 
 def look_at():
     """The player can choose to look at:
@@ -167,7 +170,7 @@ def look_at():
     the_items_in_the_room = [item.name for item in you.location.item_contents]
     target = prompt.open_response(
         question = "What do you want to look at?",
-        options = themselves + the_room + their_items + the_items_in_the_room,
+        options = no_list + themselves + the_room + their_items + the_items_in_the_room,
     )
     if target in themselves:
         you.character_sheet()
@@ -177,6 +180,8 @@ def look_at():
         examine(match_string_to_class(target, you.inventory))
     elif target in the_items_in_the_room:
         examine(match_string_to_class(target, you.location.item_contents))
+    elif target in no_list:
+        print("\nYou canceled.")
 
 def match_string_to_class(string, list):
     """Takes a string and a list of classes. Outputs the class that has that string as its name."""
@@ -192,12 +197,15 @@ def pick_up():
     """The player takes an item from the room and adds it to their inventory."""
     target = prompt.open_response(
         question = "What do you want to pick up?",
-        options = [item.name for item in you.location.item_contents],
+        options = no_list + [item.name for item in you.location.item_contents],
     )
-    item = match_string_to_class(target, you.location.item_contents)
-    you.location.item_contents.remove(item)
-    you.inventory.append(item)
-    print(f"\nYou pick up the {item.name}.")
+    if target not in no_list:
+        item = match_string_to_class(target, you.location.item_contents)
+        you.location.item_contents.remove(item)
+        you.inventory.append(item)
+        print(f"\nYou pick up the {item.name}.")
+    else:
+        print("\nYou canceled.")
 
 def unequip():
     """The player chooses an item they are currently equipping and unequips it."""
