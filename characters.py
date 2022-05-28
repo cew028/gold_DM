@@ -34,8 +34,6 @@ class Player():
         WIS = 0,
         current_hp = 0,
         max_hp = 0,
-        AC = 0,
-        AV = 0,
         gold_on_person = 0,
         gold_stored_away = 0,
         gold_spent_this_level = 0,
@@ -73,8 +71,6 @@ class Player():
         self.WIS = WIS
         self.current_hp = current_hp
         self.max_hp = max_hp
-        self.AC = AC
-        self.AV = AV
         self.gold_on_person = gold_on_person
         self.gold_stored_away = gold_stored_away
         self.gold_spent_this_level = gold_spent_this_level
@@ -96,13 +92,13 @@ class Player():
         self.worn_dominant_hand = worn_dominant_hand
         self.worn_off_hand = worn_off_hand
     
-    def calculate_AC(self) -> int:
+    def AC(self) -> int:
         armor_and_shield_score = 0
         for item in filter(None, self.equipped_items):    
             armor_and_shield_score += item.armor_bonus
         return self.DEX + armor_and_shield_score
     
-    def calculate_AV(self) -> int:
+    def AV(self) -> int:
         return self.AV_by_level[self.level-1]
     
     def calculate_highest_stat(self) -> list:
@@ -143,7 +139,7 @@ class Player():
             [
                 f"{self.name}: ({self.character_class} {self.level})",
                 f"CHA {self.CHA}, CON {self.CON}, DEX {self.DEX}, INT {self.INT}, STR {self.STR}, WIS {self.WIS}",
-                f"{self.current_hp}/{self.max_hp} HP, {self.AC} AC, {self.AV} AV",
+                f"{self.current_hp}/{self.max_hp} HP, {self.AC()} AC, {self.AV()} AV",
                 f"{self.gold_spent_this_level} gold spent this level, {self.gold_on_person} gold on person",
                 f"EQUIPMENT: ({len(self.inventory)}/{self.STR})",
                 f"{', '.join([item.name for item in self.inventory])}",
@@ -281,11 +277,9 @@ class Player():
                 self.spell_list = "Necronomicon"
                 self.abilities = ["Corruption",]
         self.level = 1
-        self.AV = self.calculate_AV()
         self.max_hp = dice.roll(1,self.die,1) + 4
         self.current_hp = self.max_hp
         self.gold_to_next_level = self.calculate_level_up_gold()
-        self.AC = self.calculate_AC()
         
         self.character_sheet()
         

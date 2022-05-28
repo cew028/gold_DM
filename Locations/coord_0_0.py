@@ -46,9 +46,30 @@ room_1_sword = craft.Item(
     description = "A rusty iron sword.",
     damage_die = 4,
     armor_bonus = 0,
-    effect = "No effect",
     holdable_dominant_hand = True,
+)
+room_1_armor = craft.Item(
+    name = "Armor",
+    description = "Some test armor.",
+    armor_bonus = 1,
+    wearable_torso = True,
+)
+
+room_1_shield_1 = craft.Item(
+    name = "Shield 1",
+    description = "The first test shield.",
+    armor_bonus = 1,
+    holdable_dominant_hand = True,
+    holdable_off_hand = True,
+)
+
+room_1_shield_2 = craft.Item(
+    name = "Shield 2",
+    description = "The second test shield.",
+    armor_bonus = 1,
+    holdable_dominant_hand = True,
+    holdable_off_hand = True,
 )
 
 # Then place those items in the respective rooms:
-room_1.item_contents = [room_1_sword,]
+room_1.item_contents = [room_1_sword, room_1_armor, room_1_shield_1, room_1_shield_2,]

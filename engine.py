@@ -22,6 +22,8 @@ def drop():
         item = match_string_to_class(target, you.inventory)
         unequip_and = ""
         if item.equipped == True:
+            truncated_name = item.name.rsplit(" (", 1)[0]
+            item.name = truncated_name
             item.equipped = False
             you.equipped_items.remove(item)
             unequip_and = "unequip and "
@@ -34,6 +36,10 @@ def equip():
     list_of_items = []
     if you.inventory != []:
         list_of_items = [item.name for item in you.inventory]
+    # Remove objects you're already equipping:
+    for item in you.equipped_items:
+        if item.name in list_of_items:
+            list_of_items.remove(item.name)
     target = prompt.multiple_choice(
         question = "What do you want to equip?",
         options = ["Nothing"] + list_of_items,
@@ -54,25 +60,49 @@ def equip():
             ]
         )
         if equippable == True:
-            item.equipped = True
-            you.equipped_items.append(item) 
             # Equip the item, with the following priority hierarchy:
-            if item.holdable_off_hand: # Off hand before dominant to dual wield shields (can't dual wield weapons as of now).
+            if item.holdable_off_hand and you.held_off_hand == None: # Off hand before dominant to dual wield shields (can't dual wield weapons as of now).
+                item.name += " (Off hand)"
                 you.held_off_hand = item
-            elif item.holdable_dominant_hand:
+                item.equipped = True
+                you.equipped_items.append(item) 
+            elif item.holdable_dominant_hand and you.held_dominant_hand == None:
+                item.name += " (Dominant hand)"
                 you.held_dominant_hand = item
-            elif item.wearable_torso:
+                item.equipped = True
+                you.equipped_items.append(item) 
+            elif item.wearable_torso and you.worn_torso == None:
+                item.name += " (Torso)"
                 you.worn_torso = item
-            elif item.wearable_legs:
+                item.equipped = True
+                you.equipped_items.append(item) 
+            elif item.wearable_legs and you.worn_legs == None:
+                item.name += " (Legs)"
                 you.worn_legs = item
-            elif item.wearable_head:
+                item.equipped = True
+                you.equipped_items.append(item) 
+            elif item.wearable_head and you.worn_head == None:
+                item.name += " (Head)"
                 you.worn_head = item
-            elif item.wearable_feet:
+                item.equipped = True
+                you.equipped_items.append(item) 
+            elif item.wearable_feet and you.worn_feet == None:
+                item.name += " (Feet)"
                 you.worn_feet = item
-            elif item.wearable_dominant_hand: # Dominant hand before off hand for wearing
+                item.equipped = True
+                you.equipped_items.append(item) 
+            elif item.wearable_dominant_hand and you.worn_dominant_hand == None: # Dominant hand before off hand for wearing
+                item.name += " (Dominant hand)"
                 you.worn_dominant_hand = item
-            elif item.wearable_off_hand:
+                item.equipped = True
+                you.equipped_items.append(item) 
+            elif item.wearable_off_hand and you.worn_off_hand == None:
+                item.name += " (Off hand)"
                 you.worn_off_hand = item
+                item.equipped = True
+                you.equipped_items.append(item) 
+            else:
+                print(f"You can't equip the {item.name}, since you're already equipping something in its place.")
         else:
             print(f"The {item.name} is not equippable.")
 
@@ -92,12 +122,12 @@ def gameplay_loop():
             # Since open_response outputs the last selected option, substrings need to come first.
             # For example: "equip" needs to occur before "unequip".
             options = [
+                "go", "move", "walk",
                 "equip", "wear", "put on",
                 "unequip", "remove", "take off",
                 "drop", "put down", "place",
                 "take", "pick up", "grab",
                 "examine", "look", "look at",
-                "go", "move", "walk",
             ],
         )
         match what_you_do:
@@ -181,7 +211,6 @@ def unequip():
     if target != "Nothing":
         item = match_string_to_class(target, you.inventory)
         you.equipped_items.remove(item)
-        print(f"\nYou unequip the {item.name}.")
         if you.held_off_hand == item:
             you.held_off_hand = None
         if you.held_dominant_hand == item:
@@ -198,3 +227,7 @@ def unequip():
             you.worn_dominant_hand = None
         if you.worn_off_hand == item:
             you.worn_off_hand = None
+        # Delete the text indicating where the item is equipped:
+        truncated_name = item.name.rsplit(" (", 1)[0]
+        item.name = truncated_name
+        print(f"\nYou unequip the {item.name}.")
