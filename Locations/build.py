@@ -4,9 +4,9 @@ class Room():
         name = "No name",
         description = "No description",
         accessible_rooms = [],
-        contents = [],
+        item_contents = [],
     ):
         self.name = name
         self.description = description
         self.accessible_rooms = accessible_rooms
-        self.contents = contents
+        self.item_contents = item_contents

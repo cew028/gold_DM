@@ -9,7 +9,74 @@ you = characters.Player()
 # Set starting location (may later be randomized):
 you.location = coord_0_0.room_1
 
-def examine(object): # In the future this function should examine more stuff.
+def drop():
+    """The player chooses an item from their inventory and "drops it;" i.e., adds it to the room's contents."""
+    list_of_items = []
+    if you.inventory != []:
+        list_of_items = [item.name for item in you.inventory]
+    target = prompt.multiple_choice(
+        question = "What do you want to drop?",
+        options = ["Nothing"] + list_of_items,
+    )
+    if target != "Nothing":
+        item = match_string_to_class(target, you.inventory)
+        unequip_and = ""
+        if item.equipped == True:
+            item.equipped = False
+            you.equipped_items.remove(item)
+            unequip_and = "unequip and "
+        you.inventory.remove(item)
+        you.location.item_contents.append(item)
+        print(f"\nYou {unequip_and}drop the {item.name}.")
+
+def equip():
+    """The player chooses an item from their inventory and equips it."""
+    list_of_items = []
+    if you.inventory != []:
+        list_of_items = [item.name for item in you.inventory]
+    target = prompt.multiple_choice(
+        question = "What do you want to equip?",
+        options = ["Nothing"] + list_of_items,
+    )
+    if target != "Nothing":
+        item = match_string_to_class(target, you.inventory)
+        # First check that it can be equipped:
+        equippable = any(
+            [
+                item.holdable_dominant_hand,
+                item.holdable_off_hand,
+                item.wearable_head,
+                item.wearable_torso,
+                item.wearable_legs,
+                item.wearable_feet,
+                item.wearable_dominant_hand,
+                item.wearable_off_hand,
+            ]
+        )
+        if equippable == True:
+            item.equipped = True
+            you.equipped_items.append(item) 
+            # Equip the item, with the following priority hierarchy:
+            if item.holdable_off_hand: # Off hand before dominant to dual wield shields (can't dual wield weapons as of now).
+                you.held_off_hand = item
+            elif item.holdable_dominant_hand:
+                you.held_dominant_hand = item
+            elif item.wearable_torso:
+                you.worn_torso = item
+            elif item.wearable_legs:
+                you.worn_legs = item
+            elif item.wearable_head:
+                you.worn_head = item
+            elif item.wearable_feet:
+                you.worn_feet = item
+            elif item.wearable_dominant_hand: # Dominant hand before off hand for wearing
+                you.worn_dominant_hand = item
+            elif item.wearable_off_hand:
+                you.worn_off_hand = item
+        else:
+            print(f"The {item.name} is not equippable.")
+
+def examine(object):
     draw.frame(
         width = 100,
         contents = [object.description],
@@ -20,23 +87,32 @@ def gameplay_loop():
     while you.are_alive:
         what_you_do = prompt.open_response( 
             question = "What do you do?",            
-            # Since prompt.open_response selects the last valid match, make sure more common options come after less common ones.
+            # Fill out the options with as many synonyms as possible.
+            # For readability, put synonyms on the same line.
+            # Since open_response outputs the last selected option, substrings need to come first.
+            # For example: "equip" needs to occur before "unequip".
             options = [
-                "drop",
+                "equip", "wear", "put on",
+                "unequip", "remove", "take off",
+                "drop", "put down", "place",
                 "take", "pick up", "grab",
-                "examine", "look",
-                "go to", "go",
+                "examine", "look", "look at",
+                "go", "move", "walk",
             ],
         )
         match what_you_do:
-            case "go" | "go to":
+            case "go" | "move" | "walk":
                 go_to()
-            case "examine" | "look":
+            case "examine" | "look" | "look at":
                 look_at()
             case "take" | "pick up" | "grab":
                 pick_up()
-            case "drop":
+            case "drop" | "put down" | "place":
                 drop()
+            case "equip" | "wear" | "put on":
+                equip()
+            case "unequip" | "remove" | "take off":
+                unequip()
 
 def go_to():
     """Ask the player where they want to go. Then change their location to be the destination."""
@@ -58,7 +134,7 @@ def look_at():
     themselves = ["Self", "Me", "Myself", you.name]
     the_room = ["Room", "Area", "Here", you.location.name]
     their_items = [item.name for item in you.inventory]
-    the_items_in_the_room = [item.name for item in you.location.contents]
+    the_items_in_the_room = [item.name for item in you.location.item_contents]
     target = prompt.open_response(
         question = "What do you want to look at?",
         options = themselves + the_room + their_items + the_items_in_the_room,
@@ -70,8 +146,7 @@ def look_at():
     elif target in their_items:
         examine(match_string_to_class(target, you.inventory))
     elif target in the_items_in_the_room:
-        # examine(match_string_to_class(target, you.location.contents).description)
-        examine(match_string_to_class(target, you.location.contents))
+        examine(match_string_to_class(target, you.location.item_contents))
 
 def match_string_to_class(string, list):
     """Takes a string and a list of classes. Outputs the class that has that string as its name."""
@@ -87,24 +162,39 @@ def pick_up():
     """The player takes an item from the room and adds it to their inventory."""
     target = prompt.open_response(
         question = "What do you want to pick up?",
-        options = [item.name for item in you.location.contents],
+        options = [item.name for item in you.location.item_contents],
     )
-    item = match_string_to_class(target, you.location.contents)
-    you.location.contents.remove(item)
+    item = match_string_to_class(target, you.location.item_contents)
+    you.location.item_contents.remove(item)
     you.inventory.append(item)
     print(f"\nYou pick up the {item.name}.")
 
-def drop():
-    """The player chooses an item from their inventory and "drops it;" i.e., adds it to the room's contents."""
+def unequip():
+    """The player chooses an item they are currently equipping and unequips it."""
     list_of_items = []
-    if you.inventory != []:
-        list_of_items = [item.name for item in you.inventory]
+    if you.equipped_items != []:
+        list_of_items = [item.name for item in you.equipped_items]
     target = prompt.multiple_choice(
-        question = "What do you want to drop?",
+        question = "What do you want to unequip?",
         options = ["Nothing"] + list_of_items,
     )
     if target != "Nothing":
         item = match_string_to_class(target, you.inventory)
-        you.inventory.remove(item)
-        you.location.contents.append(item)
-        print(f"\nYou drop the {item.name}.")
+        you.equipped_items.remove(item)
+        print(f"\nYou unequip the {item.name}.")
+        if you.held_off_hand == item:
+            you.held_off_hand = None
+        if you.held_dominant_hand == item:
+            you.held_dominant_hand = None
+        if you.worn_torso == item:
+            you.worn_torso = None
+        if you.worn_legs == item:
+            you.worn_legs = None
+        if you.worn_head == item:
+            you.worn_head = None
+        if you.worn_feet == item:
+            you.worn_feet = None
+        if you.worn_dominant_hand == item:
+            you.worn_dominant_hand = None
+        if you.worn_off_hand == item:
+            you.worn_off_hand = None

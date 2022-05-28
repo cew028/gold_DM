@@ -47,7 +47,8 @@ room_1_sword = craft.Item(
     damage_die = 4,
     armor_bonus = 0,
     effect = "No effect",
+    holdable_dominant_hand = True,
 )
 
 # Then place those items in the respective rooms:
-room_1.contents = [room_1_sword,]
+room_1.item_contents = [room_1_sword,]

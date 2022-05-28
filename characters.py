@@ -41,15 +41,21 @@ class Player():
         gold_spent_this_level = 0,
         gold_to_next_level = 0,
         inventory = [],
+        equipped_items = [],
         spells = [],
-        equipped_armor = None,
-        equipped_shield = None,
-        equipped_weapon = None,
         spellcasting_stat = "None",
         spell_list = "None",
         abilities = [],
         are_alive = True,
         location = None,
+        held_dominant_hand = None,
+        held_off_hand = None,
+        worn_head = None,
+        worn_torso = None,
+        worn_legs = None,
+        worn_feet = None,
+        worn_dominant_hand = None,
+        worn_off_hand = None,
     ):
         self.name = name
         self.character_class = character_class
@@ -74,25 +80,27 @@ class Player():
         self.gold_spent_this_level = gold_spent_this_level
         self.gold_to_next_level = gold_to_next_level
         self.inventory = inventory
+        self.equipped_items = equipped_items
         self.spells = spells
-        self.equipped_armor = equipped_armor
-        self.equipped_shield = equipped_shield
-        self.equipped_weapon = equipped_weapon
         self.spellcasting_stat = spellcasting_stat
         self.spell_list = spell_list
         self.abilities = abilities
         self.are_alive = are_alive
         self.location = location
+        self.held_dominant_hand = held_dominant_hand
+        self.held_off_hand = held_off_hand
+        self.worn_head = worn_head
+        self.worn_torso = worn_torso
+        self.worn_legs = worn_legs
+        self.worn_feet = worn_feet
+        self.worn_dominant_hand = worn_dominant_hand
+        self.worn_off_hand = worn_off_hand
     
     def calculate_AC(self) -> int:
-        if self.equipped_armor is not None and self.equipped_shield is not None:
-            return self.DEX + self.equipped_armor.armor_bonus + self.equipped_shield.armor_bonus
-        elif self.equipped_shield is not None:
-            return self.DEX + self.equipped_shield.armor_bonus
-        elif self.equipped_armor is not None:
-            return self.DEX + self.equipped_armor.armor_bonus
-        else:
-            return self.DEX
+        armor_and_shield_score = 0
+        for item in filter(None, self.equipped_items):    
+            armor_and_shield_score += item.armor_bonus
+        return self.DEX + armor_and_shield_score
     
     def calculate_AV(self) -> int:
         return self.AV_by_level[self.level-1]
@@ -138,7 +146,7 @@ class Player():
                 f"{self.current_hp}/{self.max_hp} HP, {self.AC} AC, {self.AV} AV",
                 f"{self.gold_spent_this_level} gold spent this level, {self.gold_on_person} gold on person",
                 f"EQUIPMENT: ({len(self.inventory)}/{self.STR})",
-                f"{', '.join(self.inventory)}",
+                f"{', '.join([item.name for item in self.inventory])}",
                 "ABILITIES:",
                 "* " + "\n* ".join(self.abilities),
                 "SPELLS:",
